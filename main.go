@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -13,9 +14,8 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	assets := http.FileServer(rice.MustFindBox("assets").HTTPBox())
+	e.GET("/", echo.WrapHandler(assets))
 
 	e.Logger.Fatal(e.Start(":5000"))
 }
