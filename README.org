@@ -24,13 +24,13 @@ Use Raspberry Pi to wake up WiFi-connected laptop.
        "up": true
      }
    }
-#+end_example
+   #+end_example
 
    #+BEGIN_SRC http :pretty
      POST http://127.0.0.1:5000/api/v1/machines
      Content-Type: application/json
 
-     {"name":"fake","ip":"192.168.15.15","mac":"6c:40:08:8b:4b:02"}
+     {"name":"tung-mbp","ip":"192.168.1.104","mac":"6c:40:08:8b:4b:02"}
    #+END_SRC
 
    #+RESULTS:
@@ -47,9 +47,21 @@ Use Raspberry Pi to wake up WiFi-connected laptop.
        "ip": "192.168.15.15",
        "mac": "6c:40:08:8b:4b:02",
        "up": false
+     },
+     {
+       "name": "tung-mbp",
+       "ip": "192.168.1.108",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": false
+     },
+     {
+       "name": "tung-mbp",
+       "ip": "192.168.1.104",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": false
      }
    ]
-   #+end_example
+#+end_example
 
    #+BEGIN_SRC http :pretty
      DELETE http://127.0.0.1:5000/api/v1/machines/192.168.1.108
