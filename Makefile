@@ -19,14 +19,14 @@ pi-wol: $(GO_SRC)
 $(ASSETS)/app.js: $(PURS_SRC) $(JS_SRC)
 	$(PULP) build --to $@
 
-clean: pi-wol $(ASSETS)/app.js
+clean: pi-wol $(ASSETS)/app.js $(ASSETS)/app.min.js
 	rm $^
 
 watch:
 	@fswatch -ro src | xargs -n1 -I{} make
 
 dist: build
-	$(CLOSURE) --js $< > $@
+	$(CLOSURE) --js assets/app.js > assets/app.min.js
 	rice append --exec pi-wol
 
 .PHONY: build clean watch dist

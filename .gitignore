@@ -4,3 +4,6 @@
 /output/
 /.psc*
 /.psa*
+data.json
+/assets/app.js
+/assets/app.min.js
