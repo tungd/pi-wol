@@ -33,7 +33,7 @@ func (app *App) Read() []Machine {
 }
 
 func (app *App) Write(ms []Machine) {
-	data, _ := json.Marshal(ms)
+	data, _ := json.MarshalIndent(ms, "", "  ")
 	ioutil.WriteFile(app.Data, data, 664)
 }
 
