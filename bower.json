@@ -13,7 +13,8 @@
     "purescript-vdom": "^2.0.0",
     "purescript-signal": "^8.0.0",
     "purescript-affjax": "^3.0.2",
-    "purescript-argonaut": "^2.0.0"
+    "purescript-argonaut": "^2.0.0",
+    "purescript-smolder-vdom": "^1.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0"

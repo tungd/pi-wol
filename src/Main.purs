@@ -1,35 +1,30 @@
 module Main where
 
-import Prelude
 import Network.HTTP.Affjax as Ajax
-import Control.Monad.Aff (Aff, Canceler(..), launchAff)
-import Control.Monad.Aff.Class (liftAff)
+import Text.Smolder.HTML as H
+import Control.Monad.Aff (launchAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Timer (TIMER)
-import Control.Monad.Except (runExcept, runExceptT)
 import DOM (DOM)
-import DOM.HTML (window)
-import DOM.HTML.HTMLTrackElement.ReadyState (ReadyState(..))
-import DOM.HTML.Types (htmlDocumentToParentNode)
-import DOM.HTML.Window (document)
-import DOM.Node.ParentNode (querySelector)
-import DOM.Node.Types (Node, elementToNode)
+import DOM.Node.Types (Node)
 import Data.Argonaut (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
-import Data.Either (Either(..), either)
+import Data.Either (Either(Right, Left))
+import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), maybe)
-import Data.Nullable (toMaybe)
+import Data.Nullable (Nullable, toMaybe)
 import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\))
-import Data.VirtualDOM (patch, VNode, text, prop, h, with, EventListener(On))
+import Data.VirtualDOM (patch)
 import Data.VirtualDOM.DOM (api)
-import Network.HTTP.Affjax (AJAX)
 import Signal (sampleOn, runSignal, (~>), foldp, Signal)
 import Signal.Channel (CHANNEL, Channel, channel, send, subscribe)
 import Signal.DOM (animationFrame)
+import Text.Smolder.HTML.Attributes as A
+import Text.Smolder.Markup ((!), (#!), text, on)
+import Text.Smolder.Renderer.VDOM (render)
+import Prelude hiding (div)
 -----------------------------------------------
 
 newtype Machine = Machine
@@ -50,14 +45,15 @@ data Action = Noop | Load (Array Machine)
 -----------------------------------------------
 
 foreign import logRaw :: forall a e. a -> Eff (console :: CONSOLE | e) Unit
+foreign import select :: forall e. String -> Eff (dom :: DOM | e) (Nullable Node)
 
 init :: State
 init = []
 
-render actions state = h "div" (prop ["class" /\ "app"])
-  [ h "h1" (prop []) [text "Machines"]
-  , h "ul" (prop []) $ map (\(Machine m) -> h "li" (prop []) [text m.ip, text $ show m.up]) state
-  ]
+view actions state = H.div ! A.className "app" $ do
+  H.h1 $ text "Machines"
+  H.ul do
+    sequence_ $ map (\(Machine m) -> H.li $ text m.ip) state
 
 update :: Action -> State -> State
 update action state = case action of
@@ -74,7 +70,7 @@ app state actions target = do
   runSignal $ (input (sampleOn tick state)) ~> write
   where
     input state = foldp go (Tuple Nothing Nothing) state
-    go state (Tuple _ prev) = Tuple prev (Just $ render actions state)
+    go state (Tuple _ prev) = Tuple prev (render $ view actions state)
     write (Tuple prev next) = patch api target prev next
 
 getMachines = do
@@ -84,13 +80,11 @@ getMachines = do
     Right machines -> pure machines
 
 main = do
-  doc <- pure <<< htmlDocumentToParentNode =<< document =<< window
-  target <- map elementToNode <<< toMaybe <$> querySelector "#app" doc
+  target <- toMaybe <$> select "#app"
   actions <- channel Noop
 
   launchAff do
     machines <- getMachines
-    liftEff $ logRaw machines
     liftEff $ send actions $ Load machines
 
   let state = foldp update init $ subscribe actions

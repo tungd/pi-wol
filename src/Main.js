@@ -3,3 +3,9 @@ exports.logRaw = function(e) {
     console.log(e)
   }
 }
+
+exports.select = function(s) {
+  return function() {
+    return document.querySelector(s) || null
+  }
+}
