@@ -61,7 +61,7 @@ func (app *App) listMachine(c echo.Context) error {
 	if err := p.Run(); err != nil {
 		log.Fatalln(err)
 	}
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, machines)
 }
 
 func (app *App) createMachine(c echo.Context) error {
