@@ -5,10 +5,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"log"
+	"net"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	rice "github.com/GeertJohan/go.rice"
+	"github.com/tatsushid/go-fastping"
 )
 
 type Machine struct {
@@ -38,8 +41,27 @@ func (app *App) Write(ms []Machine) {
 }
 
 func (app *App) listMachine(c echo.Context) error {
-	// TODO: append machine status
-	return c.JSON(http.StatusOK, app.Read())
+	machines := app.Read()
+
+	results := make(map[string]*Machine)
+	p := fastping.NewPinger()
+	for i, m := range machines {
+		ip, _ := net.ResolveIPAddr("ip4:icmp", m.Ip)
+		results[m.Ip] = &machines[i]
+		p.AddIPAddr(ip)
+	}
+	p.OnRecv = func(addr *net.IPAddr, rtt time.Duration) {
+		m := results[addr.String()]
+		results[m.Ip].Up = true
+		log.Printf("%s: up\n", addr)
+	}
+	p.OnIdle = func() {
+		log.Println("Finished")
+	}
+	if err := p.Run(); err != nil {
+		log.Fatalln(err)
+	}
+	return c.JSON(http.StatusOK, results)
 }
 
 func (app *App) createMachine(c echo.Context) error {

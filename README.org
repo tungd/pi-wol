@@ -9,31 +9,47 @@ Use Raspberry Pi to wake up WiFi-connected laptop.
    #+END_SRC
 
    #+RESULTS:
-   : [
-   :   {
-   :     "name": "tung-mbp",
-   :     "ip": "192.168.1.108",
-   :     "mac": "6c:40:08:8b:4b:02",
-   :     "up": false
-   :   }
-   : ]
+   #+begin_example
+   {
+     "192.168.15.15": {
+       "name": "fake",
+       "ip": "192.168.15.15",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": false
+     },
+     "192.168.15.31": {
+       "name": "tung-mbp",
+       "ip": "192.168.15.31",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": true
+     }
+   }
+#+end_example
 
    #+BEGIN_SRC http :pretty
      POST http://127.0.0.1:5000/api/v1/machines
      Content-Type: application/json
 
-     {"name":"tung-mbp","ip":"192.168.1.108","mac":"6c:40:08:8b:4b:02"}
+     {"name":"fake","ip":"192.168.15.15","mac":"6c:40:08:8b:4b:02"}
    #+END_SRC
 
    #+RESULTS:
-   : [
-   :   {
-   :     "name": "tung-mbp",
-   :     "ip": "192.168.1.108",
-   :     "mac": "6c:40:08:8b:4b:02",
-   :     "up": false
-   :   }
-   : ]
+   #+begin_example
+   [
+     {
+       "name": "tung-mbp",
+       "ip": "192.168.15.31",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": false
+     },
+     {
+       "name": "fake",
+       "ip": "192.168.15.15",
+       "mac": "6c:40:08:8b:4b:02",
+       "up": false
+     }
+   ]
+   #+end_example
 
    #+BEGIN_SRC http :pretty
      DELETE http://127.0.0.1:5000/api/v1/machines/192.168.1.108
