@@ -72,7 +72,7 @@ func (app *App) createMachine(c echo.Context) error {
 
 	machines := append(app.Read(), m)
 	app.Write(machines)
-	return c.JSON(http.StatusCreated, machines)
+	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 
 func (app *App) deleteMachine(c echo.Context) error {
@@ -84,7 +84,11 @@ func (app *App) deleteMachine(c echo.Context) error {
 		}
 	}
 	app.Write(machines)
-	return c.JSON(http.StatusOK, machines)
+	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
+}
+
+func (app *App) wakeMachine(c echo.Context) error {
+	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 
 func main() {
@@ -97,6 +101,7 @@ func main() {
 	e.GET("/api/v1/machines", app.listMachine)
 	e.POST("/api/v1/machines", app.createMachine)
 	e.DELETE("/api/v1/machines/:ip", app.deleteMachine)
+	e.PATCH("/api/v1/machines/:ip", app.wakeMachine)
 
 	assets := http.FileServer(rice.MustFindBox("./assets").HTTPBox())
 	e.GET("/*", echo.WrapHandler(assets))
