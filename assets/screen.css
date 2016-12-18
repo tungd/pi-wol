@@ -26,3 +26,11 @@ body {
 .machine small {
   color: #888;
 }
+
+.fg-red {
+  color: #f00;
+}
+
+.fg-green {
+  color: green;
+}
