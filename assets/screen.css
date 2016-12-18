@@ -1,8 +1,28 @@
-* {
-  box-sizing: border-box;
+body {
+  background: #fefefe;
+  color: #444;
+  font-family: Arial, sans-serif;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+.bg-white {
+  background: #fff;
+}
+
+.border {
+  border-color: #bbb;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.machine:hover {
+  background: #ddd;
+}
+.machine:active {
+  background: #bbb;
+}
+
+.machine small {
+  color: #888;
 }

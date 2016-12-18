@@ -2,6 +2,7 @@ module Main where
 
 import Network.HTTP.Affjax as Ajax
 import Text.Smolder.HTML as H
+import Text.Smolder.HTML.Attributes as A
 import Control.Monad.Aff (launchAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -21,8 +22,7 @@ import Data.VirtualDOM.DOM (api)
 import Signal (sampleOn, runSignal, (~>), foldp, Signal)
 import Signal.Channel (CHANNEL, Channel, channel, send, subscribe)
 import Signal.DOM (animationFrame)
-import Text.Smolder.HTML.Attributes as A
-import Text.Smolder.Markup ((!), (#!), text, on)
+import Text.Smolder.Markup (MarkupM, on, text, (!), (#!))
 import Text.Smolder.Renderer.VDOM (render)
 import Prelude hiding (div)
 -----------------------------------------------
@@ -50,10 +50,23 @@ foreign import select :: forall e. String -> Eff (dom :: DOM | e) (Nullable Node
 init :: State
 init = []
 
-view actions state = H.div ! A.className "app" $ do
+view actions state = H.div ! A.className "sans-serif px4 py2 max-width-2" $ do
   H.h1 $ text "Machines"
-  H.ul do
-    sequence_ $ map (\(Machine m) -> H.li $ text m.ip) state
+  H.ul ! A.className "list-reset" $ do
+    sequence_ $ map machine state
+  where
+    machine (Machine m) = H.li !
+      A.className "machine p1 mb1 bg-white border cursor-pointer clearfix" $ do
+        text $ m.name
+        H.small $ text $ " (" <> m.ip <> ")"
+        H.span ! A.className "right fa fa-spin fa-circle-o-notch" $ text ""
+        -- H.i ! A.className "fa fa-circle-o-notch"
+
+    status true = "Up"
+    status false = "Down"
+
+    -- fa :: forall e. String -> MarkupM e Unit
+    -- fa n =
 
 update :: Action -> State -> State
 update action state = case action of
