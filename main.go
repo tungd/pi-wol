@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"log"
 	"net"
@@ -12,36 +10,23 @@ import (
 	"github.com/labstack/echo/middleware"
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/tatsushid/go-fastping"
+	"github.com/timshannon/bolthold"
 )
 
 type Machine struct {
 	Name string `json:"name"`
-	Ip string `json:"ip"`
+	Ip string `json:"ip" boltholdIndex:"Ip"`
 	MacAddress string `json:"mac"`
 	Up bool `json:"up"`
 }
 
 type App struct {
-	Data string
-}
-
-func (app *App) Read() []Machine {
-	var machines []Machine
-	data, err := ioutil.ReadFile(app.Data)
-	if err != nil {
-		log.Fatal("Error reading data file.")
-	}
-	json.Unmarshal(data, &machines)
-	return machines
-}
-
-func (app *App) Write(ms []Machine) {
-	data, _ := json.MarshalIndent(ms, "", "  ")
-	ioutil.WriteFile(app.Data, data, 664)
+	Store *bolthold.Store
 }
 
 func (app *App) listMachine(c echo.Context) error {
-	machines := app.Read()
+	var machines []Machine
+	app.Store.Find(&machines, bolthold.Where(bolthold.Key).Ne(""))
 
 	results := make(map[string]*Machine)
 	p := fastping.NewPinger()
@@ -70,29 +55,28 @@ func (app *App) createMachine(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	machines := append(app.Read(), m)
-	app.Write(machines)
+	app.Store.Upsert(m.Ip, m)
 	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 
 func (app *App) deleteMachine(c echo.Context) error {
 	ip := c.Param("ip")
-	machines := []Machine{}
-	for _, m := range app.Read() {
-		if m.Ip != ip {
-			machines = append(machines, m)
-		}
-	}
-	app.Write(machines)
+	app.Store.DeleteMatching(&Machine{}, bolthold.Where(bolthold.Key).Eq(ip))
 	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 
 func (app *App) wakeMachine(c echo.Context) error {
+	// TODO
 	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 
 func main() {
-	app := App{"data.json"}
+	store, err := bolthold.Open("data.db", 0666, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	app := App{store}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
