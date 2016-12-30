@@ -11,6 +11,7 @@ import (
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/tatsushid/go-fastping"
 	"github.com/timshannon/bolthold"
+	"github.com/sabhiram/go-wol"
 )
 
 type Machine struct {
@@ -66,7 +67,18 @@ func (app *App) deleteMachine(c echo.Context) error {
 }
 
 func (app *App) wakeMachine(c echo.Context) error {
-	// TODO
+	ip := c.Param("ip")
+	m := Machine{}
+
+	if err := app.Store.Get(ip, &m); err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+
+	err := wol.SendMagicPacket(m.MacAddress, "255.255.255.255:9", "")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/api/v1/machines")
 }
 

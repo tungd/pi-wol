@@ -27,7 +27,7 @@ Use Raspberry Pi to wake up WiFi-connected laptop.
        "name": "tung-mbp",
        "ip": "192.168.15.22",
        "mac": "6c:40:08:8b:4b:02",
-       "up": true
+       "up": false
      }
    ]
    #+end_example
@@ -48,6 +48,11 @@ Use Raspberry Pi to wake up WiFi-connected laptop.
    #+RESULTS:
    : []
 
+   #+BEGIN_SRC http :pretty
+     PATCH http://127.0.0.1:5000/api/v1/machines/192.168.15.22
+   #+END_SRC
+
+   #+RESULTS:
 
 ** LICENSE
 
